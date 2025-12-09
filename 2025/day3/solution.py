@@ -57,30 +57,26 @@ class JoltageCheck:
                     second_largest_bank_val = bank_val
             max_joltage = max_joltage + max_bank_val * 10 + second_largest_bank_val
         return max_joltage
+
     def findMaxTwelveBankJoltage(self) -> int:
         max_joltage: int = 0
         for battery in self.batteries:
-            max_bank_vals: list[int] = battery.bank[slice(0,12)]
-            for index, bank_val in enumerate(battery.bank[slice(0,len(battery.bank))]):
-                start: int = 0
-                end: int =  len(battery.bank)
-                if 12 - (index + 1) < 0:
-                    start = 12 - (len(battery.bank) - (index + 1))
-                for inner_index, curr_max_bank_val in enumerate(max_bank_vals[slice(start,end)]):
-                    if bank_val >= curr_max_bank_val:
-                        max_bank_vals[inner_index + start] = bank_val
-                        break
-            print(f"Intermediate result: {list_of_ints_to_single_int(max_bank_vals)}")
+            max_bank_vals: list[int] = []
+            index = 0
+            #ignore last digits
+            ignore_last_digits = len(battery.bank) - 12
+            while index < len(battery.bank):
+                new_bank = battery.bank[slice(index, len(battery.bank) - 12 + len(max_bank_vals) + 1)]
+                max_index = new_bank.index(max(new_bank))
+                max_bank_vals.append(max(new_bank))
+                index = index + max_index + 1
+                if len(max_bank_vals) == 12:
+                    break
+            #print(f"Intermediate result: {list_of_ints_to_single_int(max_bank_vals)}")
             max_joltage = max_joltage + list_of_ints_to_single_int(max_bank_vals)
         return max_joltage
 
-        
-            
-
-
-
-
-myJoltageCheck = JoltageCheck("example_input.txt")
+myJoltageCheck = JoltageCheck("input.txt")
 max_joltage = myJoltageCheck.findMaxJoltage()
 print(f"Solution Part 1: {max_joltage}")
 
