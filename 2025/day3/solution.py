@@ -63,10 +63,9 @@ class JoltageCheck:
         for battery in self.batteries:
             max_bank_vals: list[int] = []
             index = 0
-            #ignore last digits
-            ignore_last_digits = len(battery.bank) - 12
+
             while index < len(battery.bank):
-                new_bank = battery.bank[slice(index, len(battery.bank) - 12 + len(max_bank_vals) + 1)]
+                new_bank = battery.bank[slice(index, len(battery.bank) + len(max_bank_vals) - 11)]
                 max_index = new_bank.index(max(new_bank))
                 max_bank_vals.append(max(new_bank))
                 index = index + max_index + 1
