@@ -15,18 +15,13 @@ def gauss(range: Range) -> int:
 def merge_ranges(range_a: Range, range_b: Range) -> list[Range]:
     new_range: Range = Range(start = 0, end= 0)
     # check if ranges can be merged
-    if not (range_b.start <= range_a.start <= range_b.end) and not (range_b.start <= range_a.end <= range_b.end): 
+    if not (range_a.start <= range_b.end and range_b.start <= range_a.end):
         return [range_a, range_b]
-    if range_a.end > range_b.end:
-        new_range.end = range_a.end
-    else:
-        new_range.end = range_b.end
-    
-    if range_a.start < range_b.start:
-        new_range.start = range_a.start
-    else:
-        new_range.start = range_b.start
-    return [new_range]
+    merged = Range(
+        start=min(range_a.start, range_b.start),
+        end=max(range_a.end, range_b.end)
+    )
+    return [merged]
 
 class FileReader:
     def read_from_file(filepath: str) -> tuple[list[Range], list[int]]:
@@ -100,10 +95,7 @@ class Cafeteria:
         return
 
 
-
-
-
-myCafeteria = Cafeteria("example_input.txt")
+myCafeteria = Cafeteria("input.txt")
 print(myCafeteria.get_count_fresh_food())
 myCafeteria.merge_ranges()
 print(myCafeteria.fresh_id_count())
