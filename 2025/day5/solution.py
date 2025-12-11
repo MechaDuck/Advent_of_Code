@@ -1,9 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class Range:
     start: int
     end: int
+    children: set = field(default_factory=set)
 
 def gauss(range: Range) -> int:
     n = range.end - range.start + 1
@@ -80,18 +81,22 @@ class Cafeteria:
         return sum
     def merge_ranges(self):
         isMergedCompletely: bool = False
-        new_ranges: list[Range] = self.ranges.copy()
-        while(not isMergedCompletely):
-            isMergedCompletely = True
-            self.ranges = new_ranges.copy()
 
-            for i in range(0, len(self.ranges)-1):
-                new_range = merge_ranges(self.ranges[i], self.ranges[i + 1])
-                if len(new_range) != 2:
-                    isMergedCompletely = False
-                new_ranges.remove(self.ranges[i])
-                new_ranges.remove(self.ranges[i + 1])
-                new_ranges = new_ranges + new_range
+        while(not isMergedCompletely):
+            new_ranges: list[Range] = []
+            isMergedCompletely = True
+            for i, range_1 in enumerate(self.ranges):
+                for j in range(i +1, len(self.ranges)):
+                    new_range = merge_ranges(range_1, self.ranges[j])
+                    if len(new_range) != 2:
+                        isMergedCompletely = False
+                        self.ranges.remove(self.ranges[j])
+                        self.ranges.remove(range_1)
+                        self.ranges = self.ranges + new_range
+                        break
+                if isMergedCompletely == False:
+                    break
+
         return
 
 
