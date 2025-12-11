@@ -5,6 +5,27 @@ class Range:
     start: int
     end: int
 
+def gauss(range: Range) -> int:
+    n = range.end - range.start + 1
+    a1 = range.start
+    a2 = range.end
+    return (n/2)*(a1 + a2)
+
+def merge_ranges(range_a: Range, range_b: Range) -> list[Range]:
+    new_range: Range = Range(start = 0, end= 0)
+    # check if ranges can be merged
+    if not (range_b.start <= range_a.start <= range_b.end) and not (range_b.start <= range_a.end <= range_b.end): 
+        return [range_a, range_b]
+    if range_a.end > range_b.end:
+        new_range.end = range_a.end
+    else:
+        new_range.end = range_b.end
+    
+    if range_a.start < range_b.start:
+        new_range.start = range_a.start
+    else:
+        new_range.start = range_b.start
+    return [new_range]
 
 class FileReader:
     def read_from_file(filepath: str) -> tuple[list[Range], list[int]]:
@@ -47,6 +68,37 @@ class Cafeteria:
                 fresh_counter = fresh_counter + 1
                 break
         return fresh_counter
+    def fresh_id_ranges(self) -> int:
+        sum = 0
+        for range in self.ranges:
+            sum = sum + gauss(range)
+        return sum
+    def fresh_id_count(self) -> int:
+        sum = 0
+        for range in self.ranges:
+            sum = sum + abs((range.end - range.start) + 1)
+        return sum
+    def merge_ranges(self):
+        isMergedCompletely: bool = False
+        new_ranges: list[Range] = self.ranges.copy()
+        while(not isMergedCompletely):
+            isMergedCompletely = True
+            self.ranges = new_ranges.copy()
 
-myCafeteria = Cafeteria("input.txt")
+            for i in range(0, len(self.ranges)-1):
+                new_range = merge_ranges(self.ranges[i], self.ranges[i + 1])
+                if len(new_range) != 2:
+                    isMergedCompletely = False
+                new_ranges.remove(self.ranges[i])
+                new_ranges.remove(self.ranges[i + 1])
+                new_ranges = new_ranges + new_range
+        return
+
+
+
+
+
+myCafeteria = Cafeteria("example_input.txt")
 print(myCafeteria.get_count_fresh_food())
+myCafeteria.merge_ranges()
+print(myCafeteria.fresh_id_count())
