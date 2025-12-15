@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 class Range:
     start: int
     end: int
-    children: set = field(default_factory=set)
 
 def gauss(range: Range) -> int:
     n = range.end - range.start + 1
