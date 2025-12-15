@@ -3,14 +3,6 @@ from collections import defaultdict
 import networkx as nx
 import matplotlib.pyplot as plt
 
-G = nx.DiGraph()
-
-class TreeNode:
-  def __init__(self, data):
-    self.data = data
-    self.left = None
-    self.right = None
-
 def count_paths_dag(graph, start_node, end_nodes: list[any]) -> int:
     topo_sort = list(nx.topological_sort(graph))
     
@@ -50,9 +42,9 @@ class Laboratories:
         self.simulation_line = 0
         self.counter_split = 0
         start_loc = findOccurrences(self.grid[0], "S")[0]
-        self.tree_dir = { f"0,{start_loc}": f"0,{start_loc}"}
+        self.node_dir = { f"0,{start_loc}": f"0,{start_loc}"}
         self.start_node = f"0,{start_loc}"
-        self.graph = G
+        self.graph = nx.DiGraph()
 
         self.graph.add_node(f"0,{start_loc}")
 
@@ -62,22 +54,29 @@ class Laboratories:
 
         beam_locs = findOccurrences(self.grid[self.simulation_line], "|") + findOccurrences(self.grid[self.simulation_line], "S")
         for beam_loc in beam_locs:
-            parent = self.tree_dir[f"{self.simulation_line},{beam_loc}"]
+            parent_id = self.node_dir[f"{self.simulation_line},{beam_loc}"]
             object = self.grid[self.simulation_line + 1][beam_loc]
             if object == "^":
-                self.grid[self.simulation_line + 1][beam_loc - 1] = '|'
-                self.graph.add_edge(f"{parent}",f"{self.simulation_line + 1},{beam_loc - 1}")
-                self.tree_dir[f"{self.simulation_line + 1},{beam_loc - 1}"] = f"{self.simulation_line + 1},{beam_loc - 1}"
 
+                child_id_left = f"{self.simulation_line + 1},{beam_loc - 1}"
+                self.grid[self.simulation_line + 1][beam_loc - 1] = '|'
+
+                self.graph.add_edge(parent_id,child_id_left)
+                self.node_dir[child_id_left] = child_id_left
+
+                child_id_right = f"{self.simulation_line + 1},{beam_loc + 1}"
                 self.grid[self.simulation_line + 1][beam_loc + 1] = '|'
-                self.graph.add_edge(f"{parent}",f"{self.simulation_line + 1},{beam_loc + 1}")
-                self.tree_dir[f"{self.simulation_line + 1},{beam_loc + 1}"] = f"{self.simulation_line + 1},{beam_loc + 1}"
+
+                self.graph.add_edge(parent_id,child_id_right)
+                self.node_dir[child_id_right] = child_id_right
 
                 self.counter_split = self.counter_split +1
             else:
+                child_id = f"{self.simulation_line + 1},{beam_loc}"
                 self.grid[self.simulation_line + 1][beam_loc] = '|'
-                self.graph.add_edge(f"{parent}",f"{self.simulation_line + 1},{beam_loc}")
-                self.tree_dir[f"{self.simulation_line + 1},{beam_loc}"]= f"{self.simulation_line + 1},{beam_loc}"
+
+                self.graph.add_edge(parent_id,child_id)
+                self.node_dir[child_id]= child_id
         self.simulation_line = self.simulation_line + 1
         return True
 
@@ -89,7 +88,7 @@ while(True):
 print(f"Solution Part 1: {myLaboratories.counter_split}")
 
 topo_sort = list(nx.topological_sort(myLaboratories.graph))
-end_nodes = [node for node in myLaboratories.graph.nodes if G.out_degree(node) == 0]
+end_nodes = [node for node in myLaboratories.graph.nodes if myLaboratories.graph.out_degree(node) == 0]
 
 count_paths = count_paths_dag(myLaboratories.graph, myLaboratories.start_node, end_nodes)
 print(f"Solution Part 2: {count_paths}")
