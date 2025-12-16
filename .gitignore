@@ -1,2 +1,3 @@
 #Exclude input files
 input.txt
+venv

@@ -6,6 +6,18 @@ class Node:
     device_name: str
     outputs: list[str]
 
+def count_paths_dag(graph, start_node, end_node: any) -> int:
+    topo_sort = list(nx.topological_sort(graph))
+    
+
+    path_count = {node: 0 for node in graph.nodes}
+    path_count[start_node] = 1 
+
+    for node in topo_sort:
+        if path_count[node] > 0: 
+            for neighbor in graph.neighbors(node):
+                path_count[neighbor] += path_count[node]
+    return path_count[end_node]
 
 class FileReader:
     def read_from_file(filepath: str) -> list[Node]:
@@ -52,65 +64,10 @@ print(f"Solution Part 1: {len(list(paths))}")
 
 myReactor = Reactor("input.txt")
 myReactor.create_graph()
+topo_sort = list(nx.topological_sort(myReactor.graph))
 
-# dac to fft is zero, meaning paths are only interesting, if the search does not hit dac before fft
-# paths = nx.all_simple_paths(myReactor.graph, source='dac', target='fft')
-# print(f"{len(list(paths))}")
+svr_fft_path_count = count_paths_dag(myReactor.graph, 'svr', 'fft')
+fft_dac_path_count = count_paths_dag(myReactor.graph, 'fft', 'dac')
+dac_fft_path_count = count_paths_dag(myReactor.graph, 'dac', 'out')
 
-# dac to out has 16647 paths
-# paths = nx.all_simple_paths(myReactor.graph, source='dac', target='out')
-# print(f"{len(list(paths))}")
-
-myReactor = Reactor("input.txt")
-myReactor.create_graph(['dac'])
-
-paths = nx.all_simple_paths(myReactor.graph, source='svr', target='fft', cutoff=14)
-print(f"{len(list(paths))}")
-paths = list(nx.dfs_edges(myReactor.graph, source='svr'))
-
-c = 0
-for path in paths:
-    if 'fft' in path:
-        c = c + 1
-
-myReactor = Reactor("input.txt")
-myReactor.create_graph(['fft'])
-
-paths = nx.all_simple_paths(myReactor.graph, source='svr', target='dac')
-print(f"{len(list(paths))}")
-
-paths = list(nx.dfs_edges(myReactor.graph, source='svr'))
-
-paths = nx.all_simple_paths(myReactor.graph, source='fft', target='svr')
-print(f"{len(list(paths))}")
-
-filtered_paths = [path for path in paths if 'dac' not in path]
-
-
-paths = nx.all_simple_paths(myReactor.graph, source='dac', target='out')
-print(f"{len(list(paths))}")
-
-
-
-paths = nx.all_simple_paths(myReactor.graph, source='svr', target='ddc')
-print(f"{len(list(paths))}")
-
-
-
-
-
-
-
-
-
-
-
-
-paths = list(paths)
-counter = 0
-for path in paths:
-    if 'dac' in path and 'fft' in path:
-        counter = counter + 1
-
-
-print(f"Solution Part 2: {counter}")
+print(f"Solution Part 2: {svr_fft_path_count * fft_dac_path_count * dac_fft_path_count}")
