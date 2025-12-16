@@ -1,7 +1,4 @@
-from dataclasses import dataclass
-from collections import defaultdict
 import networkx as nx
-import matplotlib.pyplot as plt
 
 def count_paths_dag(graph, start_node, end_nodes: list[any]) -> int:
     topo_sort = list(nx.topological_sort(graph))
